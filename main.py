@@ -16,6 +16,16 @@ def get_text_messages(message):
         img = open('D:\Tg\Homo.PNG', 'rb')
         bot.send_photo(message.from_user.id, img) #ответ бота
         bot.send_message(message.from_user.id, "Привет, Гигус младший, здесь начнется твое становление Сигмой. Okeeey, leets gooo!")
+    if message.text == '🦾 Добавить результат':
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        btn1 = types.KeyboardButton("Жим")
+        btn2 = types.KeyboardButton("Подтягивания")
+        btn3 = types.KeyboardButton("Становая")
+        btn4 = types.KeyboardButton("Присяд")
+        markup.add(btn1, btn2)
+        markup.add(btn3, btn4)
+        bot.send_message(message.from_user.id, "Покажи всем на что ты способен)", reply_markup=markup)
+
 bot.polling(none_stop=True)
 
 
