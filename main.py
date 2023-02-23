@@ -12,7 +12,7 @@ def start(message):
     btn3 = types.KeyboardButton('Рейтинг🌏')
     markup.add(btn1, btn2)
     markup.add(btn3)
-    bot.send_message(message.from_user.id, " 👋 Поздороваться / \n🦾 Добавить результат\n/Смотреть Рейтинг🌏", reply_markup=markup)
+    bot.send_message(message.from_user.id, " 👋 Поздороваться / \n🦾 Добавить результат/\n🌏 Смотреть Рейтинг", reply_markup=markup)
 @bot.message_handler(content_types=['text'])
 def get_text_messages(message):
     if message.text == '👋 Поздороваться':
@@ -30,7 +30,7 @@ def get_text_messages(message):
         markup.add(btn1, btn2)
         markup.add(btn3, btn4)
         markup.add(btn5)
-        bot.send_message(message.from_user.id, "Покажи всем на что ты способен)", reply_markup=markup)
+        bot.send_message(message.from_user.id, "Покажи всем на что ты способен в: ", reply_markup=markup)
 
     if message.text == 'Жим':
         add_result(message)
@@ -74,8 +74,8 @@ def rating(message):
         markup.add(btn1, btn2)
         markup.add(btn3, btn4)
         markup.add(btn5)
-        bot.send_message(message.from_user.id, "Абсолютный pound for pound рейтинг:)", reply_markup=markup)
-        bot.send_message(message.from_user.id, "Можешь выбрать свое коронное движение, чтобы увидеть лучших в нем!:)")
+        bot.send_message(message.from_user.id, "Абсолютный pound for pound рейтинг:\n вася пупки 400 кг\n Антон флеер 700кг ", reply_markup=markup)
+        bot.send_message(message.from_user.id, "Можешь выбрать свое коронное движение, чтобы увидеть лучших в нем!: ")
         bot.register_next_step_handler(message, rating)
     if message.text == 'Жим':
         bot.send_message(message.from_user.id, "Рейтинг по Жиму:")
@@ -87,7 +87,7 @@ def rating(message):
         bot.send_message(message.from_user.id, "Рейтинг по Становой:")
         bot.register_next_step_handler(message, rating)
     if message.text == 'Подтягивания':
-        bot.send_message(message.from_user.id, "Рейтинг по Подтягиваниям:)")
+        bot.send_message(message.from_user.id, "Рейтинг по Подтягиваниям:")
         bot.register_next_step_handler(message, rating)
     if message.text == '/start':
         start(message)
