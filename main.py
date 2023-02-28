@@ -9,8 +9,8 @@ cursor = conn.cursor()
 
 
 
-def db_table_val(user_id: int, user_name: str):
-    cursor.execute('INSERT INTO users (user_id, user_name) VALUES (?, ?)', (user_id, user_name))
+def db_table_val(user_id: int, user_name: str, press:int, pull_up:int, sit:int, stan:0):
+    cursor.execute('INSERT INTO users (user_id, user_name, press, pull_up, sit, stan) VALUES (?, ?, ?,?, ?, ?)', (user_id, user_name, press,pull_up, sit, stan))
     conn.commit()
 def update_InfoInBd(message):
     print(message)
@@ -34,8 +34,62 @@ def update_InfoInBd(message):
     else:
         us_id = message.from_user.id
         us_name = message.from_user.first_name
-        db_table_val(user_id=us_id, user_name=us_name)
+
+        db_table_val(user_id=us_id, user_name=us_name, press=0, pull_up=0, sit=0, stan=0 )
         print("Запись успешно добавлена")
+
+def update_press(message, name_sport):
+    print(message)
+    print("Подключен к SQLite")
+    sqlite_select_query = """SELECT * from users"""
+    cursor.execute(sqlite_select_query)
+    records = cursor.fetchall()
+    print("Всего строк:  ", len(records))
+    true = 0
+    id = 0
+    for row in records:
+        if row[1] == message.from_user.id:
+            id = row[0]
+    if name_sport== "Подтягивания":
+        name_sport = "pull_up"
+    if name_sport== "Жим":
+        name_sport = "press"
+    if name_sport== "Присед":
+        name_sport = "sit"
+    if name_sport== "Становая":
+        name_sport = "stan"
+    sql_update_query = """Update users set """+name_sport+""" =""" + message.text + """ where id =""" + str(id)
+    cursor.execute(sql_update_query)
+    conn.commit()
+    print("Запись успешно обновлена "+name_sport)
+
+def rating_up(message, name_sport):
+    print("Подключен к SQLite")
+    sqlite_select_query = """SELECT * from users"""
+    cursor.execute(sqlite_select_query)
+    records = cursor.fetchall()
+    print("Всего строк:  ", len(records))
+    if message.text == "Жим":
+        bot.send_message(message.from_user.id, "Рейтинг по Жиму:")
+        for row in records:
+            print(row[0],row[1],row[2],row[3],row[4],row[5],row[6])
+            bot.send_message(message.from_user.id, row[2] + " = " + str(row[3]))
+
+    if message.text == "Присед":
+        bot.send_message(message.from_user.id, "Рейтинг по Приседу:")
+        for row in records:
+            bot.send_message(message.from_user.id, row[2] + " = " + str(row[5]))
+    if message.text == "Становая":
+        bot.send_message(message.from_user.id, "Рейтинг по Становой:")
+        for row in records:
+            bot.send_message(message.from_user.id, row[2] + " = " + str(row[6]))
+    if message.text == "Подтягивания":
+        bot.send_message(message.from_user.id, "Рейтинг по Подтягиваниям:")
+        for row in records:
+            bot.send_message(message.from_user.id, row[2]+" = "+str(row[4]))
+
+
+
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -48,6 +102,7 @@ def start(message):
     markup.add(btn3)
     bot.send_message(message.from_user.id, " 👋 Поздороваться / \n🦾 Добавить результат/\n🌏 Смотреть Рейтинг",
                      reply_markup=markup)
+
 
 
 @bot.message_handler(content_types=['text'])
@@ -85,6 +140,7 @@ def get_result(message, name_sport):
     btn2 = types.KeyboardButton("/start")
     markup.add(btn1)
     markup.add(btn2)
+    update_press(message, name_sport)
     bot.send_message(message.from_user.id, "Ваш результат: " + message.text + " кг", reply_markup=markup)
     bot.register_next_step_handler(message, rating)
 
@@ -116,17 +172,13 @@ def rating(message):
         bot.send_message(message.from_user.id, "Можешь выбрать свое коронное движение, чтобы увидеть лучших в нем!: ")
         bot.register_next_step_handler(message, rating)
     if message.text == 'Жим':
-        bot.send_message(message.from_user.id, "Рейтинг по Жиму:")
-        bot.register_next_step_handler(message, rating)
+        rating_up(message, "press")
     if message.text == 'Присед':
-        bot.send_message(message.from_user.id, "Рейтинг по Присяду:")
-        bot.register_next_step_handler(message, rating)
+        rating_up(message, "sit")
     if message.text == 'Становая':
-        bot.send_message(message.from_user.id, "Рейтинг по Становой:")
-        bot.register_next_step_handler(message, rating)
+        rating_up(message, "stan")
     if message.text == 'Подтягивания':
-        bot.send_message(message.from_user.id, "Рейтинг по Подтягиваниям:")
-        bot.register_next_step_handler(message, rating)
+        rating_up(message, "pull_up")
     if message.text == '/start':
         start(message)
 
