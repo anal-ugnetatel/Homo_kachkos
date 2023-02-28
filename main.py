@@ -12,20 +12,34 @@ cursor = conn.cursor()
 def db_table_val(user_id: int, user_name: str):
     cursor.execute('INSERT INTO users (user_id, user_name) VALUES (?, ?)', (user_id, user_name))
     conn.commit()
-
-
-@bot.message_handler(commands=['start'])
-def start(message):
+def update_InfoInBd(message):
     print(message)
     print("Подключен к SQLite")
     sqlite_select_query = """SELECT * from users"""
     cursor.execute(sqlite_select_query)
     records = cursor.fetchall()
     print("Всего строк:  ", len(records))
-    print("Вывод каждой строки")
+    true = 0
+    id = 0
     for row in records:
-        print("ID:", row[0])
-        print("Имя:", row[1])
+        if int(row[1]) == int(message.from_user.id):
+            true = 1
+            id = row[0]
+    if true == 1:
+        sql_update_query = """Update users set user_id =""" + str(message.from_user.id) + """ where id =""" + str(id)
+        cursor.execute(sql_update_query)
+        conn.commit()
+        print("Запись успешно обновлена")
+
+    else:
+        us_id = message.from_user.id
+        us_name = message.from_user.first_name
+        db_table_val(user_id=us_id, user_name=us_name)
+        print("Запись успешно добавлена")
+
+@bot.message_handler(commands=['start'])
+def start(message):
+    update_InfoInBd(message)
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     btn1 = types.KeyboardButton("👋 Поздороваться")
     btn2 = types.KeyboardButton('🦾 Добавить результат')
@@ -40,14 +54,10 @@ def start(message):
 def get_text_messages(message):
     if message.text == '👋 Поздороваться':
         img = open('D:\Tg\Homo.PNG', 'rb')
-        us_id = message.from_user.id
-        us_name = message.from_user.first_name
-        db_table_val(user_id=us_id, user_name=us_name)
+        update_InfoInBd(message)
         bot.send_photo(message.from_user.id, img)  # ответ бота
-
         bot.send_message(message.from_user.id,
                          "Привет, Гигус младший, здесь начнется твое становление Сигмой. Okeeey, leets gooo!")
-
     if message.text == '🦾 Добавить результат':
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         btn1 = types.KeyboardButton("Жим")
@@ -59,7 +69,6 @@ def get_text_messages(message):
         markup.add(btn3, btn4)
         markup.add(btn5)
         bot.send_message(message.from_user.id, "Покажи всем на что ты способен в: ", reply_markup=markup)
-
     if message.text == 'Жим':
         add_result(message)
     if message.text == 'Присед':
@@ -70,8 +79,6 @@ def get_text_messages(message):
         add_result(message)
     if message.text == 'Рейтинг🌏':
         rating(message)
-
-
 def get_result(message, name_sport):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     btn1 = types.KeyboardButton('Рейтинг🌏')
